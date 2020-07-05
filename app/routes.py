@@ -1,19 +1,38 @@
 from app import app
 import dropbox
+from flask import request, Response
 import os
+from hashlib import sha256
+import hmac
+import threading
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from dotenv import load_dotenv
 
-dbx_access_token = os.environ["DROPBOX_ACCESS_TOKEN"]
-azure_conn_string = os.environ["AZURE_CONN_STRING"]
-azure_container_name = os.environ["AZURE_CONTAINER_NAME"]
+APP_ROOT = os.path.join(os.path.dirname(__file__), "..")
+dotenv_path = os.path.join(APP_ROOT, ".env")
+load_dotenv(dotenv_path)
+
+dbx_access_token = os.getenv("DROPBOX_ACCESS_TOKEN")
+azure_conn_string = os.getenv("AZURE_CONN_STRING")
+azure_container_name = os.getenv("AZURE_CONTAINER_NAME")
 
 
-@app.route("/")
-@app.route("/index")
+@app.route("/webhook", methods=["GET"])
+def verify():
+    """Respond to the webhook verification (GET request) by echoing back the challenge parameter."""
+
+    resp = Response(request.args.get("challenge"))
+    resp.headers["Content-Type"] = "text/plain"
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+
+    return resp
+
+
+@app.route("/webhook", methods=["POST"])
 def index():
-
     dbx = dropbox.Dropbox(dbx_access_token)
 
+    # Get cursor from local file. If it doesn't exist, hit the API to get latest cursor.
     cursor = read_cursor()
     if not cursor.strip():
         latest_cursor = dbx.files_list_folder_get_latest_cursor("", recursive=True)
@@ -40,7 +59,7 @@ def index():
         has_more = result.has_more
         write_cursor(cursor)
 
-    return cursor
+    return ""
 
 
 def upload_to_blob_storage(filename, file_content):
