@@ -5,11 +5,17 @@ services:
     command: gunicorn --bind 0.0.0.0:5000 dbx_to_azure_blob:app
     volumes:
       - ./:/usr/src/app
-    ports:
-      - 5000:5000
+    expose:
+      - 5000
     environment:
       - DROPBOX_ACCESS_TOKEN=${DROPBOX_ACCESS_TOKEN}
       - AZURE_CONN_STRING=${AZURE_CONN_STRING}
       - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME}
       - FLASK_APP=dbx_to_azure_blob.py
       - FLASK_DEBUG=
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - web
