@@ -12,7 +12,6 @@ services:
       - AZURE_CONN_STRING=${AZURE_CONN_STRING}
       - AZURE_CONTAINER_NAME=${AZURE_CONTAINER_NAME}
       - FLASK_APP=dbx_to_azure_blob.py
-      - FLASK_DEBUG=
   nginx:
     build: ./nginx
     ports:
