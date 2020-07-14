@@ -30,6 +30,10 @@ def verify():
 @app.route("/webhook", methods=["POST"])
 def index():
     dbx = dropbox.Dropbox(dbx_access_token)
+    app.logger.info("post caction hit")
+    app.logger.info(f'DBX: {dbx_access_token}')
+    app.logger.info(f'AZ Conn: {azure_conn_string}')
+    app.logger.info(f'AZ Contain: {azure_container_name}')
 
     # Get cursor from local file. If it doesn't exist, hit the API to get latest cursor.
     cursor = read_cursor()
@@ -44,6 +48,7 @@ def index():
 
         for entry in result.entries:
             filename = entry.path_lower
+            app.logger.info(f'Filename: {filename}')
 
             file = dbx.files_download(filename)
             path_name = file[0].path_lower
