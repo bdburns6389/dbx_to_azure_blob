@@ -7,6 +7,7 @@ services:
       - ./:/usr/src/app
     expose:
       - 5000
+    restart: always
     environment:
       - DROPBOX_ACCESS_TOKEN=QkwG-MThZnAAAAAAAAAOx0gIVf2U_A37KVstAwbEWwBkxYaUCZUO6pysOQlx7yUL
       - AZURE_CONN_STRING=${AZURE_CONN_STRING}
@@ -16,5 +17,6 @@ services:
     build: ./nginx
     ports:
       - 80:80
+    restart: always
     depends_on:
       - web
